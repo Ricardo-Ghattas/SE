@@ -1,4 +1,3 @@
-import { IdentifaibleCakeBuilder } from "../model/builders/Cake.builder";
 import { IdentifiableOrderItemBUilder, OrderBuilder } from "../model/builders/Order.builder";
 import { IIdentifiableItem, IItem } from "../model/IItem";
 import { IIdentifiableOrderItem, IOrder } from "../model/IOrder";

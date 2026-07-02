@@ -1,13 +1,12 @@
 
 import logger from "./util/logger";
-import { OrderRepository } from "./repository/sqlite/Order.repository";
-import { CakeRepository } from "./repository/sqlite/Cake.order.repository";
 import { CakeBuilder, IdentifaibleCakeBuilder } from "./model/builders/Cake.builder";
 import { IdentifiableOrderItemBUilder, OrderBuilder } from "./model/builders/Order.builder";
+import { ItemCategory } from "./model/IItem";
+import { DBMode, RepositoryFactory } from "./repository/sqlite/Repository.factory";
 
 async function DBSandBox() {
-    const dbOrder = new OrderRepository(new CakeRepository());
-    await dbOrder.init();
+    const dbOrder = await RepositoryFactory.create(DBMode.FILE, ItemCategory.CAKE);
 
     // create identifiable cake
 const cake = CakeBuilder.newBuilder()
@@ -34,9 +33,9 @@ const cake = CakeBuilder.newBuilder()
 
     await dbOrder.create(idOrder)
 
-    await dbOrder.delete(idOrder.getId());
-
     await dbOrder.update(idOrder);
+
+    await dbOrder.delete(idOrder.getId());
 
     console.log((await dbOrder.getAll()).length);
 
