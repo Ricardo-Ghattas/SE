@@ -12,6 +12,8 @@ export default {
             cake: "src/data/cake orders.csv"
         },
         sqlite: "src/data/order.db"
-    }
+    },
+    port : process.env.PORT ? parseInt(process.env.PORT) : 3000,
+    host: process.env.HOST || "localhost"
 
 }

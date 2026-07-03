@@ -1,46 +1,49 @@
-
-import logger from "./util/logger";
-import { CakeBuilder, IdentifaibleCakeBuilder } from "./model/builders/Cake.builder";
-import { IdentifiableOrderItemBUilder, OrderBuilder } from "./model/builders/Order.builder";
-import { ItemCategory } from "./model/IItem";
-import { DBMode, RepositoryFactory } from "./repository/sqlite/Repository.factory";
-
-async function DBSandBox() {
-    const dbOrder = await RepositoryFactory.create(DBMode.FILE, ItemCategory.CAKE);
-
-    // create identifiable cake
-const cake = CakeBuilder.newBuilder()
-    .setType("Birthday")
-    .setFlavor("Chocolate")
-    .setFilling("Vanilla cream")
-    .setSize(8)
-    .setLayers(2)
-    .setFrostingType("Buttercream")
-    .setFrostingFlavor("Chocolate")
-    .setDecorationType("Sprinkles")
-    .setDecorationColor("Blue")
-    .setCustomMessage("Happy Birthday")
-    .setShape("Round")
-    .setAllergies("None")
-    .setSpecialIngredients("Fresh strawberries")
-    .setPackagingType("Box")
-    .build();    // create identifiable order
-    const idCake = IdentifaibleCakeBuilder.newBuilder().setCake(cake).setId("17" + Math.random()).build()
-
-    // create identifiable order
-    const order = OrderBuilder.newBuilder().setItem(idCake).setPrice(100).setQuantity(1).setId("123" + Math.random()).build();
-    const idOrder = IdentifiableOrderItemBUilder.newBuilder().setItem(idCake).setOrder(order).build();
-
-    await dbOrder.create(idOrder)
-
-    await dbOrder.update(idOrder);
-
-    await dbOrder.delete(idOrder.getId());
-
-    console.log((await dbOrder.getAll()).length);
+import config from './config';
+import express, { NextFunction, Request, Response } from 'express';
+import logger from './util/logger';
+import helmet from 'helmet';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import requestLogger from './Middlewares/requestLogger';
+import routes from './routes';
+import { ApiException } from './util/exceptions/ApiExceptions';
 
 
-} 
+const app = express();
 
-//main();
-DBSandBox().catch((error) => logger.info("Error in DBSabdBox", error as Error));
+// configure helmet
+app.use(helmet());
+
+// configure body parser
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// configure cors
+app.use(cors());
+
+// configure middleware
+app.use(requestLogger);
+
+// configure routes
+app.use('/', routes)
+
+// configure 404 errors
+app.use((req, res) => {
+    res.status(404).json({ error: "Not Found" });
+});
+
+// configure Error Handler
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    if (err instanceof ApiException) {
+        const apiExeption = err as ApiException;
+        logger.error("API Exception of status %d: %s", apiExeption.status, err.message);
+        res.status(apiExeption.status).json({ error: err.message });
+    } else {
+        logger.error("Unhandled Error: %s", err.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+app.listen(config.port, config.host, () => {
+  logger.info(`Server is running on http://%s:%d`, config.host, config.port);
+});
