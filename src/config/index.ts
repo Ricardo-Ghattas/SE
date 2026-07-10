@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import path from "path";
+import { DBMode } from "../repository/sqlite/Repository.factory";
 
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
@@ -14,6 +15,8 @@ export default {
         sqlite: "src/data/order.db"
     },
     port : process.env.PORT ? parseInt(process.env.PORT) : 3000,
-    host: process.env.HOST || "localhost"
+    host: process.env.HOST || "localhost",
+    dbMode: DBMode.SQLITE,
+
 
 }

@@ -1,6 +1,6 @@
 import config from "../../config";
 import { ItemCategory } from "../../model/IItem";
-import { IOrder } from "../../model/IOrder";
+import { IIdentifiableOrderItem, IOrder } from "../../model/IOrder";
 import { CakeOrderRepository } from "../file/Cake.order.repository";
 import { Initializable, IRepository } from "../IRepository";
 import { CakeRepository } from "./Cake.order.repository";
@@ -14,11 +14,11 @@ export enum DBMode {
 
 export class RepositoryFactory {
 
-    public static async create(mode: DBMode, category: ItemCategory): Promise<IRepository<IOrder>> {
+    public static async create(mode: DBMode, category: ItemCategory): Promise<IRepository<IIdentifiableOrderItem>> {
         switch (mode) {
             case DBMode.SQLITE:
                 {
-                    let repository: IRepository<IOrder> & Initializable;
+                    let repository: IRepository<IIdentifiableOrderItem> & Initializable;
                     switch (category) {
                         case ItemCategory.CAKE:
                             repository = new OrderRepository(new CakeRepository());
@@ -29,15 +29,10 @@ export class RepositoryFactory {
                     await repository.init();
                     return repository;
                 }
+
+            //! Deprecated
             case DBMode.FILE:
-                switch (category) {
-                    case ItemCategory.CAKE:
-                        return new CakeOrderRepository(config.storagePath.csv.cake);
-                    default:
-                        throw new Error(`Unsupported category: ${category}`);
-                }
-            default:
-                throw new Error(`Unsupported database mode: ${mode}`);
+                throw new Error("file mode is deprecated")
         }
     }
 }
