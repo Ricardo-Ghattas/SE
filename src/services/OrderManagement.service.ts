@@ -4,8 +4,9 @@ import config from "../config";
 import { IIdentifiableOrderItem } from "../model/IOrder";
 import { ItemCategory } from "../model/IItem";
 import { IRepository } from "../repository/IRepository";
+import { ItemsNotFoundException } from "../util/exceptions/repositoryException";
 
-export class OrderManagemetnService {
+export class OrderManagementService {
     // create an order
     public async createOrder(order: IIdentifiableOrderItem): Promise<IIdentifiableOrderItem> {
         this.validateOrder(order);
@@ -19,12 +20,15 @@ export class OrderManagemetnService {
         const categories = Object.values(ItemCategory);
         for (const category of categories) {
             const repo = await this.getRepo(category)
-            const order = await repo.get(id);
-            if (order) {
-                return order;
+            try {
+                return await repo.get(id);
+            } catch (error) {
+                if (!(error instanceof ItemsNotFoundException)) {
+                    throw error;
+                }
             }
         }
-        throw new ServiceException(`Order with id ${id} not found`);
+        throw new ItemsNotFoundException(`Order with id ${id} not found`);
     }
     // upadate order
     public async updateOrder(order: IIdentifiableOrderItem): Promise<void> {
@@ -39,13 +43,17 @@ export class OrderManagemetnService {
         const categories = Object.values(ItemCategory);
         for (const category of categories) {
             const repo = await this.getRepo(category);
-            const order = await repo.get(id);
-            if (order) {
+            try {
+                await repo.get(id);
                 await repo.delete(id);
                 return;
+            } catch (error) {
+                if (!(error instanceof ItemsNotFoundException)) {
+                    throw error;
+                }
             }
         }
-        throw new ServiceException(`Order with id ${id} not found`);
+        throw new ItemsNotFoundException(`Order with id ${id} not found`);
     }
     // get all orders
     public async getAllOrders(): Promise<IIdentifiableOrderItem[]> {
@@ -61,12 +69,7 @@ export class OrderManagemetnService {
     // get total revenue
     public async getTotalRevenue(): Promise<number> {
         const orders = await this.getAllOrders();
-        const revenues = orders.map(order => order.getPrice() * order.getQuantity());
-        let total = 0;
-        for (const revenue of revenues) {
-            total += revenue;
-        }
-        return total;
+        return orders.reduce((total, order) => total + order.getPrice() * order.getQuantity(), 0);
     }
 
     // get total orders
@@ -80,7 +83,7 @@ export class OrderManagemetnService {
     }
 
     private validateOrder(order: IIdentifiableOrderItem): void {
-        if (!order.getItem() || order.getPrice() <= 0 || order.getQuantity() <= 0) {
+        if (!order || !order.getItem() || !Number.isFinite(order.getPrice()) || !Number.isFinite(order.getQuantity()) || order.getPrice() <= 0 || order.getQuantity() <= 0) {
             throw new ServiceException("Invalid order: item, price, and quantity must be valid.");
         }
     }

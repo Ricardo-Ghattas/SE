@@ -64,3 +64,42 @@ export class SQLiteOrderMapper implements IMapper< {data: SQLiteOrder, item: IId
  
     
 }
+
+export interface JSONRequestOrder {
+    id: string;
+    category: string;
+    item: unknown;
+    quantity?: number;
+    quatity?: number;
+    price: number;
+}
+
+export class JSONRequestOrderMapper implements IMapper<JSONRequestOrder, IdentifiableOrderItemBUilder> {
+
+    constructor(private itemMapper: IMapper<unknown, IIdentifiableItem>) { }
+
+    map(data: JSONRequestOrder): IdentifiableOrderItemBUilder {
+        const item = this.itemMapper.map(data.item);
+        const quantity = typeof data.quantity === "number" ? data.quantity : data.quatity;
+        if (typeof quantity !== "number") {
+            throw new Error("Order quantity is required");
+        }
+
+        const order = OrderBuilder.newBuilder()
+            .setId(data.id)
+            .setPrice(data.price)
+            .setQuantity(quantity)
+            .setItem(item)
+            .build();
+
+        return IdentifiableOrderItemBUilder.newBuilder()
+            .setOrder(order)
+            .setItem(item);
+    }
+
+    reverseMap(data: IdentifiableOrderItemBUilder): JSONRequestOrder {
+        void data;
+        throw new Error("Method not implemented.");
+    }
+
+}

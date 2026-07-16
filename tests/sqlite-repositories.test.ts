@@ -7,7 +7,7 @@ import { IdentifiableOrderItem } from "../src/model/Order.model";
 import { CakeRepository } from "../src/repository/sqlite/Cake.order.repository";
 import { ConnectionManager } from "../src/repository/sqlite/ConnectionManager";
 import { OrderRepository } from "../src/repository/sqlite/Order.repository";
-import { DbException, InitalizationException } from "../src/util/exceptions/repositoryException";
+import { DbException, InitalizationException, ItemsNotFoundException } from "../src/util/exceptions/repositoryException";
 
 type MockDb = {
     exec: jest.MockedFunction<(sql: string) => Promise<void>>;
@@ -293,7 +293,7 @@ describe("OrderRepository", () => {
     it("rolls back when delete cannot find the order", async () => {
         db.get.mockResolvedValue(undefined);
 
-        await expect(new OrderRepository(itemRepository).delete("missing-order")).rejects.toThrow(DbException);
+        await expect(new OrderRepository(itemRepository).delete("missing-order")).rejects.toThrow(ItemsNotFoundException);
 
         expect(itemRepository.delete).not.toHaveBeenCalled();
         expect(db.exec).toHaveBeenCalledWith("ROLLBACK");

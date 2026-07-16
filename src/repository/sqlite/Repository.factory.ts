@@ -1,16 +1,12 @@
-import config from "../../config";
+import { DBMode } from "../../config/types";
 import { ItemCategory } from "../../model/IItem";
-import { IIdentifiableOrderItem, IOrder } from "../../model/IOrder";
-import { CakeOrderRepository } from "../file/Cake.order.repository";
+import { IIdentifiableOrderItem } from "../../model/IOrder";
 import { Initializable, IRepository } from "../IRepository";
 import { CakeRepository } from "./Cake.order.repository";
 import { OrderRepository } from "./Order.repository";
 
 
-export enum DBMode {
-    SQLITE,
-    FILE
-}
+
 
 export class RepositoryFactory {
 

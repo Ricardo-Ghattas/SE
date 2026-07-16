@@ -1,10 +1,9 @@
 export class ApiException extends Error {
     public status: number;
-    constructor( status: number, message: string, error: Error) {
+    constructor( status: number, message: string) {
         super(message);
         this.name = "ApiException";
-        this.stack = error.stack;
-        this.message = `${message}: ${error.message}`;
+        this.message = `${message}`;
         this.status = status;
 
     }

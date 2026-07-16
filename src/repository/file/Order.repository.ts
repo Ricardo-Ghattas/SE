@@ -17,11 +17,11 @@ export abstract class OrderRepository implements IRepository<IOrder> {
         // load the Iorders
         const orders = await this.load();
         // add new Iorder
-        const id = orders.push(item);
+        orders.push(item);
         // save all Iorders
         await this.save(orders);
-        logger.info(`Successfully created order with ID ${id}`);
-        return String(id)
+        logger.info(`Successfully created order with ID ${item.getId()}`);
+        return item.getId();
     }
 
     async get(id: string): Promise<IOrder> {

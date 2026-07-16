@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import path from "path";
-import { DBMode } from "../repository/sqlite/Repository.factory";
+import { DBMode } from "./types";
 
-dotenv.config({ path: path.join(__dirname, "../../.env") });
+dotenv.config({ path: path.join(process.cwd(), ".env") });
 
 
 export default {

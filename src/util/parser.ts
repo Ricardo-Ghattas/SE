@@ -1,31 +1,29 @@
 // src/utils/parser.ts
-import fs from 'fs'; 
+import fs from 'fs';
+import { parse } from 'csv-parse';
 import { stringify as csvStringify } from 'csv-stringify';
 import logger from './logger';
 
 export const parseCSV = (filePath: string): Promise<string[][]> => {
   return new Promise((resolve, reject) => {
-    const results: string[][] = []; // Store parsed CSV rows as arrays
-    const readStream = fs.createReadStream(filePath, { encoding: 'utf-8' }); // Create a readable stream for the file
+    const results: string[][] = [];
+    const parser = parse({ skip_empty_lines: true, trim: true });
 
-    readStream.on('data', (chunk: string) => {
-      // Process data chunks from the file
-      const lines = chunk.split('\n').filter(line => line.trim() !== ''); // Split data into lines and remove empty lines
-      lines.forEach((line) => {
-        const columns = line.split(',').map(value => value.trim().replace(/^"(.*)"$/, '$1')); 
-        // Split line into columns, trim spaces, and remove quotes
-        results.push(columns); // Add parsed row to results
-      });
+    parser.on('readable', () => {
+      let row: string[] | null;
+      while ((row = parser.read() as string[] | null) !== null) {
+        results.push(row);
+      }
     });
-
-    readStream.on('end', () => {
-      resolve(results); // Resolve the promise with parsed data when done
-    });
-
-    readStream.on('error', (error) => {
+    parser.on('end', () => resolve(results));
+    parser.on('error', (error) => {
       logger.error("Error while reading the stream of file %s, $o", filePath, error);
-      reject(error); // Reject the promise if an error occurs
+      reject(error);
     });
+
+    fs.createReadStream(filePath, { encoding: 'utf-8' })
+      .on('error', reject)
+      .pipe(parser);
   });
 };
 

@@ -113,6 +113,9 @@ export class CakeRepository implements IRepository<IdentifiableCake>, Initializa
             return new SQLiteCakeMapper().map(result)
 
         } catch (error) {
+            if (error instanceof ItemsNotFoundException) {
+                throw error;
+            }
             logger.error("Failed to get error of id %s %o", id, error as Error)
             throw new DbException("Failed to get Order of id" + id, error as Error)
 

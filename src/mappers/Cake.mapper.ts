@@ -108,3 +108,52 @@ export class SQLiteCakeMapper implements IMapper<SQLiteCake, IdentifiableCake> {
         };
     }
 }
+
+export interface JSONRequestCake {
+    id: string;
+    type: string;
+    flavor: string;
+    filling: string;
+    size: number;
+    layers: number;
+    frostingType: string;
+    frostingFlavor: string;
+    decorationType: string;
+    decorationColor: string;
+    customMessage: string;
+    shape: string;
+    allergies: string;
+    specialIngredients: string;
+    packagingType: string;
+}
+
+export class JSONRequestCakeMapper implements IMapper<JSONRequestCake, IdentifiableCake> {
+    map(data: JSONRequestCake): IdentifiableCake {
+        const cake = CakeBuilder.newBuilder()
+            .setType(data.type)
+            .setFlavor(data.flavor)
+            .setFilling(data.filling)
+            .setSize(data.size)
+            .setLayers(data.layers)
+            .setFrostingType(data.frostingType)
+            .setFrostingFlavor(data.frostingFlavor)
+            .setDecorationType(data.decorationType)
+            .setDecorationColor(data.decorationColor)
+            .setCustomMessage(data.customMessage)
+            .setShape(data.shape)
+            .setAllergies(data.allergies)
+            .setSpecialIngredients(data.specialIngredients)
+            .setPackagingType(data.packagingType)
+            .build();
+
+        return IdentifaibleCakeBuilder.newBuilder()
+            .setId(data.id)
+            .setCake(cake)
+            .build();
+    }
+
+    reverseMap(data: IdentifiableCake): JSONRequestCake {
+        void data;
+        throw new Error("Method not implemented.");
+    }
+}

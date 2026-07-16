@@ -1,7 +1,7 @@
 import { IIdentifiableOrderItem } from "../../model/IOrder";
 import { id, Initializable, IRepository } from "../IRepository";
 import logger from "../../util/logger";
-import { DbException, InitalizationException } from "../../util/exceptions/repositoryException";
+import { DbException, InitalizationException, ItemsNotFoundException } from "../../util/exceptions/repositoryException";
 import { ConnectionManager } from "./ConnectionManager";
 import { IIdentifiableItem } from "../../model/IItem";
 import { SQLiteOrder, SQLiteOrderMapper } from "../../mappers/Order.mapper";
@@ -92,13 +92,16 @@ export class OrderRepository implements IRepository<IIdentifiableOrderItem>, Ini
             const result = await conn.get<SQLiteOrder>(SELECT_BY_ID, id);
             if (!result) {
                 logger.error("Order of id %s not found", id)
-                throw new Error("Order of id" + id + "not found");
+                throw new ItemsNotFoundException(`Order with id ${id} not found`);
             }
             const cake = await this.itemRepository.get(result.item_id)
 
             return new SQLiteOrderMapper().map({ data: result, item: cake })
 
         } catch (error) {
+            if (error instanceof ItemsNotFoundException) {
+                throw error;
+            }
             logger.error("Failed to get error of id %s %o", id, error as Error)
             throw new DbException("Failed to get Order of id" + id, error as Error)
 
@@ -169,7 +172,7 @@ export class OrderRepository implements IRepository<IIdentifiableOrderItem>, Ini
                 await conn.exec("BEGIN TRANSACTION");
                 const result = await conn.get<SQLiteOrder>(SELECT_BY_ID, id);
                 if (!result) {
-                    throw new Error("Order of id" + id + "not found");
+                    throw new ItemsNotFoundException(`Order with id ${id} not found`);
                 }
                 await this.itemRepository.delete(result.item_id);
 
@@ -179,6 +182,9 @@ export class OrderRepository implements IRepository<IIdentifiableOrderItem>, Ini
                 logger.error("Failed to delete Order of id %s %o", id, error as Error);
                 if (conn) {
                     await conn.exec("ROLLBACK");
+                }
+                if (error instanceof ItemsNotFoundException) {
+                    throw error;
                 }
                 throw new DbException("Failed to delete Order of id " + id, error as Error);
 
