@@ -1,22 +1,20 @@
+// From: src/routes/order.route.ts
 import { Router } from "express";
 import { OrderController } from "../controllers/order.controller";
+import { asyncHandler } from "../Middlewares/asyncHandler";
 import { OrderManagementService } from "../services/OrderManagement.service";
 
 const orderController = new OrderController(new OrderManagementService());
+const route = Router();
 
-const routes = Router();
+route.route('/')
+     // Wrap controller methods with asyncHandler
+     .get(asyncHandler(orderController.getOrders.bind(orderController)))
+     .post(asyncHandler(orderController.createOrder.bind(orderController)));
 
-routes.route('/')
-    .get(orderController.getOrders.bind(orderController))
-    .post(orderController.createOrder.bind(orderController));
+route.route('/:id')
+     .get(asyncHandler(orderController.getOrder.bind(orderController)))
+     .put(asyncHandler(orderController.updateOrder.bind(orderController)))
+     .delete(asyncHandler(orderController.deleteOrder.bind(orderController)));
 
-routes.get('/total-revenue', orderController.getTotalRevenue.bind(orderController));
-routes.get('/total-orders', orderController.getTotalOrders.bind(orderController));
-
-routes.route('/:id')
-    .get(orderController.getOrder.bind(orderController))
-    .put(orderController.updateOrder.bind(orderController))
-    .delete(orderController.deleteOrder.bind(orderController));
-
-
-export default routes;
+export default route;
