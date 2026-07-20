@@ -9,6 +9,7 @@ import routes from './routes';
 import { ApiException } from './util/exceptions/ApiExceptions';
 import { ItemsNotFoundException } from './util/exceptions/repositoryException';
 import { ServiceException } from './util/exceptions/ServiceException';
+import { HttpException } from './util/exceptions/Http/httpException';
 
 
 const app = express();
@@ -35,25 +36,24 @@ app.use((req, res) => {
 });
 
 // configure Error Handler
+// After: Enhanced Global Error Handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    void req;
-    void next;
-    if (err instanceof ApiException) {
-        const apiExeption = err as ApiException;
-        logger.error("API Exception of status %d: %s", apiExeption.status, err.message);
-        res.status(apiExeption.status).json({ error: err.message });
-    } else if (err instanceof ItemsNotFoundException) {
-        logger.warn("Resource not found: %s", err.message);
-        res.status(404).json({ error: err.message });
-    } else if (err instanceof ServiceException) {
-        logger.warn("Invalid request: %s", err.message);
-        res.status(400).json({ error: err.message });
+    if ( err instanceof HttpException) {
+        const httpException = err as HttpException;
+        // Log includes name, status, message, and details
+        logger.error(" %s [%d] \"%s\" %o", httpException.name, httpException.status, httpException.message, httpException.details || {});
+        // Response includes message and details
+        res.status(httpException.status).json({
+            message: httpException.message,
+            details: httpException.details || undefined
+        });
     } else {
         logger.error("Unhandled Error: %s", err.message);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ 
+            message: "Internal Server Error"
+        });
     }
-});
-
+})
 app.listen(config.port, config.host, () => {
   logger.info(`Server is running on http://%s:%d`, config.host, config.port);
 });

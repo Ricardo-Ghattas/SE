@@ -5,6 +5,8 @@ import { IIdentifiableOrderItem } from "../model/IOrder";
 import { ItemCategory } from "../model/IItem";
 import { IRepository } from "../repository/IRepository";
 import { ItemsNotFoundException } from "../util/exceptions/repositoryException";
+import { NotFoundException } from "../util/exceptions/Http/NotFoundException";
+import { BadRequestException } from "../util/exceptions/Http/BadRequestException";
 
 export class OrderManagementService {
     // create an order
@@ -19,16 +21,17 @@ export class OrderManagementService {
     public async getOrder(id: string): Promise<IIdentifiableOrderItem> {
         const categories = Object.values(ItemCategory);
         for (const category of categories) {
-            const repo = await this.getRepo(category)
             try {
-                return await repo.get(id);
+                const repo = await this.getRepo(category)
+                const order = await repo.get(id)
+                return order;
             } catch (error) {
                 if (!(error instanceof ItemsNotFoundException)) {
                     throw error;
                 }
             }
         }
-        throw new ItemsNotFoundException(`Order with id ${id} not found`);
+        throw new NotFoundException(`Order with id ${id} not found`);
     }
     // upadate order
     public async updateOrder(order: IIdentifiableOrderItem): Promise<void> {
@@ -53,7 +56,7 @@ export class OrderManagementService {
                 }
             }
         }
-        throw new ItemsNotFoundException(`Order with id ${id} not found`);
+        throw new NotFoundException(`Order with id ${id} not found`);
     }
     // get all orders
     public async getAllOrders(): Promise<IIdentifiableOrderItem[]> {
@@ -82,9 +85,19 @@ export class OrderManagementService {
         return RepositoryFactory.create(config.dbMode, category);
     }
 
+    // After: Service throwing BadRequestException with details
     private validateOrder(order: IIdentifiableOrderItem): void {
-        if (!order || !order.getItem() || !Number.isFinite(order.getPrice()) || !Number.isFinite(order.getQuantity()) || order.getPrice() <= 0 || order.getQuantity() <= 0) {
-            throw new ServiceException("Invalid order: item, price, and quantity must be valid.");
+        if (!order.getItem() || order.getPrice() <= 0 || order.getQuantity() <= 0) {
+            const details = {
+                ItemNotDefined: !order.getItem(),
+                PriceNegative: order.getPrice() <= 0,
+                QuantityNegative: order.getQuantity() <= 0
+            }
+            throw new BadRequestException("Invalid order: item, price, and quantity must be valid.", details);
         }
     }
 }
+
+
+
+
