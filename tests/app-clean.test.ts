@@ -157,10 +157,14 @@ describe("FinanceCalculator", () => {
 
         expect(revenue).toEqual(86)
     });
+<<<<<<< HEAD
 
     it("should return zero average buy power with no orders", () => {
         const calc = new FinanceClaculator();
 
         expect(calc.getAverageBuyPower([])).toBe(0);
     });
+=======
+    // halla2 l average but power
+>>>>>>> Assignment-1-Parsers-Engines
 })

@@ -50,9 +50,13 @@ export class OrderManagement {
             this.orders.push({ id: this.orders.length + 1, item, price });
         } catch(error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
+<<<<<<< HEAD
             const wrappedError = new Error("[OrderManagement] error adding order: " + message);
             (wrappedError as Error & { cause: unknown }).cause = error;
             throw wrappedError;
+=======
+            throw new Error("[OrderManagement] error adding order: " + message, { cause: error });
+>>>>>>> Assignment-1-Parsers-Engines
         }
     }
     getOrder(id: number) {

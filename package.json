@@ -2,15 +2,19 @@
   "name": "se",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "build/src/index.js",
   "scripts": {
     "lint": "eslint src",
     "clean": "rm -rf build",
     "prebuild": "npm run clean && npm run lint",
     "build": "tsc",
+<<<<<<< HEAD
     "postbuild": "echo \"Finnished build with size: $(du -sh build | cut -f1)\"",
+=======
+    "postbuild": "echo \"Finished build with size: $(du -sh build | cut -f1)\"",
+>>>>>>> Assignment-1-Parsers-Engines
     "prestart": "npm run build",
-    "start": "node build/index.js",
+    "start": "node build/src/index.js",
     "dev": "ts-node-dev --respawn src/index.ts",
     "test": "jest"
   },
