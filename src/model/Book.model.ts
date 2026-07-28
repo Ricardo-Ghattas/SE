@@ -1,9 +1,6 @@
 import { Item, ItemCategory } from "./item.model";
 
 export class Book implements Item {
-    getCategory():ItemCategory {
-        return ItemCategory.BOOK;
-}
     private title: string;
     private author: string;
     private genre: string;
@@ -16,6 +13,10 @@ export class Book implements Item {
     private quantity: number;
 
     constructor(title: string, author: string, genre: string, format: string, language: string, publisher: string, specialEdition: string, packaging: string, price: number, quantity: number) {
+        if (price < 0 || quantity < 0) {
+            throw new Error("Price and quantity must be non-negative");
+        }
+
         this.title = title;
         this.author = author;
         this.genre = genre;
@@ -56,5 +57,8 @@ export class Book implements Item {
     }
     getQuantity():number {
         return this.quantity;
+    }
+    getCategory():ItemCategory {
+        return ItemCategory.BOOK;
     }
 }

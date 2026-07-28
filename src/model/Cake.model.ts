@@ -1,10 +1,6 @@
 import { Item, ItemCategory } from "./item.model";
 
 export class Cake implements Item {
-    getCategory(): ItemCategory {
-        return ItemCategory.CAKE;
-    }
-    
     private type: string;
     private flavor: string;
     private filling: string;
@@ -93,5 +89,9 @@ export class Cake implements Item {
 
     getPackagingType(): string {
         return this.packagingType;
+    }
+
+    getCategory(): ItemCategory {
+        return ItemCategory.CAKE;
     }
 }

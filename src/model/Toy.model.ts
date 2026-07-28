@@ -1,9 +1,6 @@
 import { Item, ItemCategory } from "./item.model";
 
 export class Toy implements Item {
-    getCategory(): ItemCategory {
-        return ItemCategory.TOY;
-    }
     private type: string;
     private ageGroup: string;
     private brand: string;
@@ -14,6 +11,10 @@ export class Toy implements Item {
     private quantity: number;
     
     constructor(type: string, ageGroup: string, brand: string, material: string, batteryRequired: boolean, educational: boolean, price: number, quantity: number) {
+        if (price < 0 || quantity < 0) {
+            throw new Error("Price and quantity must be non-negative");
+        }
+
         this.type = type;
         this.ageGroup = ageGroup;
         this.brand = brand;
@@ -46,5 +47,8 @@ export class Toy implements Item {
     }
     getQuantity():number {
         return this.quantity;
+    }
+    getCategory(): ItemCategory {
+        return ItemCategory.TOY;
     }
 }
