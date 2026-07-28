@@ -21,7 +21,7 @@ describe("CSV Parser", () => {
 
     it("should reject malformed CSV rows", async () => {
         // Arrange
-        const filePath = path.join(process.cwd(), "logs/fixtures/malformed.csv");
+        const filePath = path.join(process.cwd(), "tests/fixtures/malformed.csv");
 
         // Act and Assert
         await expect(parseCSV(filePath)).rejects.toThrow("CSV row 2 has 2 values, but expected 3");
@@ -29,7 +29,7 @@ describe("CSV Parser", () => {
 
     it("should parse quoted CSV values", async () => {
         // Arrange
-        const filePath = path.join(process.cwd(), "logs/fixtures/quoted.csv");
+        const filePath = path.join(process.cwd(), "tests/fixtures/quoted.csv");
 
         // Act
         const orders = await parseCSV(filePath);
@@ -44,7 +44,7 @@ describe("CSV Parser", () => {
 
     it("should reject an empty CSV file", async () => {
         // Arrange
-        const filePath = path.join(process.cwd(), "logs/fixtures/empty.csv");
+        const filePath = path.join(process.cwd(), "tests/fixtures/empty.csv");
 
         // Act and Assert
         await expect(parseCSV(filePath)).rejects.toThrow("CSV file is empty");
@@ -52,7 +52,7 @@ describe("CSV Parser", () => {
 
     it("should reject a CSV file with an empty header", async () => {
         // Arrange
-        const filePath = path.join(process.cwd(), "logs/fixtures/empty-header.csv");
+        const filePath = path.join(process.cwd(), "tests/fixtures/empty-header.csv");
 
         // Act and Assert
         await expect(parseCSV(filePath)).rejects.toThrow("CSV header row is missing or contains empty headers");
