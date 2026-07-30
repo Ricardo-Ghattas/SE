@@ -88,12 +88,12 @@ export class CakeBuilder {
             this.specialIngredients,
             this.packagingType
         ];
-       for (const property of requiredProperties) {
-        if (!property) {
-            console.error('Required properties are missing, you cant build a cake');
-            throw new Error('Required properties are missing');
+        for (const property of requiredProperties) {
+            if (property === undefined || property === null || property === "") {
+                console.error("Required properties are missing, you cant build a cake");
+                throw new Error("Required properties are missing");
+            }
         }
-       }
         return new Cake(
             this.type,
             this.flavor,

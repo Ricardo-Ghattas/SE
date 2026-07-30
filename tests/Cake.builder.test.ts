@@ -57,6 +57,28 @@ describe("CakeBuilder", () => {
         expect(builder.setPackagingType("Premium box")).toBe(builder);
     });
 
+    it("accepts zero size and layers", () => {
+        const cake = new CakeBuilder()
+            .setType("Sample")
+            .setFlavor("Vanilla")
+            .setFilling("Cream")
+            .setSize(0)
+            .setLayers(0)
+            .setFrostingType("Buttercream")
+            .setFrostingFlavor("Vanilla")
+            .setDecorationType("None")
+            .setDecorationColor("White")
+            .setCustomMessage("Sample")
+            .setShape("Round")
+            .setAllergies("None")
+            .setSpecialIngredients("None")
+            .setPackagingType("Standard")
+            .build();
+
+        expect(cake.getSize()).toBe(0);
+        expect(cake.getLayers()).toBe(0);
+    });
+
     it("throws when a required property is missing", () => {
         const consoleError = jest.spyOn(console, "error").mockImplementation(() => undefined);
         const builder = new CakeBuilder()
@@ -80,5 +102,25 @@ describe("CakeBuilder", () => {
         );
 
         consoleError.mockRestore();
+    });
+
+    it("passes invalid negative values to the Cake model validation", () => {
+        const builder = new CakeBuilder()
+            .setType("Birthday")
+            .setFlavor("Chocolate")
+            .setFilling("Strawberry")
+            .setSize(-1)
+            .setLayers(2)
+            .setFrostingType("Buttercream")
+            .setFrostingFlavor("Vanilla")
+            .setDecorationType("Sprinkles")
+            .setDecorationColor("Blue")
+            .setCustomMessage("Happy Birthday!")
+            .setShape("Round")
+            .setAllergies("None")
+            .setSpecialIngredients("Dark chocolate")
+            .setPackagingType("Cake box");
+
+        expect(() => builder.build()).toThrow("Size and layers must be non-negative");
     });
 });

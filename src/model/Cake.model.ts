@@ -17,7 +17,10 @@ export class Cake implements Item {
     private packagingType: string;
 
     constructor(type: string, flavor: string, filling: string, size: number, layers: number, frostingType: string, frostingFlavor: string, decorationType: string, decorationColor: string, customMessage: string, shape: string, allergies: string, specialIngredients: string, packagingType: string) {
-        
+        if (size < 0 || layers < 0) {
+            throw new Error("Size and layers must be non-negative");
+        }
+
         this.type = type;
         this.flavor = flavor;
         this.filling = filling;
@@ -97,5 +100,4 @@ export class Cake implements Item {
 
     
 }
-
 
