@@ -1,9 +1,1 @@
-export interface Item {
-    getCategory(): ItemCategory;
-}; 
-
-export enum ItemCategory {
-    CAKE,
-    TOY,
-    BOOK,
-}
+export { IItem as Item, ItemCategory } from "./IItem";

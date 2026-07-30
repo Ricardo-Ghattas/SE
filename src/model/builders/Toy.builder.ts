@@ -10,6 +10,10 @@ export class ToyBuilder {
     private price!: number;
     private quantity!: number;
 
+    public static newBuilder(): ToyBuilder {
+        return new ToyBuilder();
+    }
+
     setType(type: string): ToyBuilder {
         this.type = type;
         return this;
@@ -67,6 +71,9 @@ export class ToyBuilder {
                 console.error("Required properties are missing, you cant build a toy");
                 throw new Error("Required properties are missing");
             }
+        }
+        if (Number.isNaN(this.price) || Number.isNaN(this.quantity)) {
+            throw new Error("Toy price and quantity must be valid numbers");
         }
 
         return new Toy(

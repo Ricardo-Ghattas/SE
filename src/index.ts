@@ -1,50 +1,58 @@
-import { CakeBuilder } from "./model/builders/Cake.builder";
-import { ToyBuilder } from "./model/builders/Toy.builder";
-import { BookBuilder } from "./model/builders/Book.builder";
+import { parseCSV, parseJSON, parseXML } from "./util/parser";
+import { CSVCakeMapper } from "./mappers/Cake.mapper";
+import logger from "./util/logger";
+import { CSVOrderMapper } from "./mappers/Order.mapper";
+import { JSONBookMapper } from "./mappers/Book.mapper";
+import { XMLToyMapper } from "./mappers/Toy.mapper";
+import { OrderBuilder } from "./model/builders/Order.builder";
+import { IItem } from "./model/IItem";
+import { IMapper } from "./mappers/IMapper";
 
-async function main() {
-    const cake = new CakeBuilder()
-        .setType("Birthday")
-        .setFlavor("Chocolate")
-        .setFilling("Strawberry")
-        .setSize(10)
-        .setLayers(2)
-        .setFrostingType("Buttercream")
-        .setFrostingFlavor("Vanilla")
-        .setDecorationType("Sprinkles")
-        .setDecorationColor("Blue")
-        .setCustomMessage("Happy Birthday!")
-        .setShape("Round")
-        .setAllergies("None")
-        .setSpecialIngredients("Dark chocolate")
-        .setPackagingType("Cake box")
+type DataRecord = Record<string, string>;
+
+function mapRecordOrder(
+    data: DataRecord,
+    itemMapper: IMapper<DataRecord, IItem>,
+    idKey: string,
+) {
+    return OrderBuilder.newBuilder()
+        .setId(String(data[idKey]))
+        .setQuantity(Number(data["Quantity"]))
+        .setPrice(Number(data["Price"]))
+        .setItem(itemMapper.map(data))
         .build();
-
-    const toy = new ToyBuilder()
-        .setType("Building blocks")
-        .setAgeGroup("6+")
-        .setBrand("Brick Co.")
-        .setMaterial("Plastic")
-        .setBatteryRequired(false)
-        .setEducational(true)
-        .setPrice(29.99)
-        .setQuantity(4)
-        .build();
-
-    const book = new BookBuilder()
-        .setTitle("The Pragmatic Programmer")
-        .setAuthor("Andrew Hunt and David Thomas")
-        .setGenre("Software")
-        .setFormat("Hardcover")
-        .setLanguage("English")
-        .setPublisher("Addison-Wesley")
-        .setSpecialEdition("Anniversary Edition")
-        .setPackaging("Gift wrap")
-        .setPrice(49.99)
-        .setQuantity(3)
-        .build();
-
-    console.log({ cake, toy, book });
 }
 
-void main();
+async function main() {
+    const data_csv = await parseCSV("src/data/cake orders.csv");
+    const data_json = await parseJSON("src/data/book orders.json") as unknown as DataRecord[];
+    const parsed_xml = await parseXML("src/data/toy orders.xml") as unknown as {
+        data: { row: DataRecord[] }
+    };
+
+    const cakeMapper = new CSVCakeMapper();
+    const bookMapper = new JSONBookMapper();
+    const toyMapper = new XMLToyMapper();
+
+    data_csv.shift(); // remove header row
+
+    const orderMapper_cake = new CSVOrderMapper(cakeMapper);
+    const orders_cake = data_csv.map(row => orderMapper_cake.map(row));
+    logger.info("list of Orders: \n %o", orders_cake);
+
+    const orders_book = data_json.map(row =>
+        mapRecordOrder(row, bookMapper, "Order ID")
+    );
+    logger.info("list of Orders: \n %o", orders_book);
+
+    const orders_toy = parsed_xml.data.row.map(row =>
+        mapRecordOrder(row, toyMapper, "OrderID")
+    );
+    logger.info("list of Orders: \n %o", orders_toy);
+
+}
+
+main().catch(error => {
+    logger.error("Failed to process orders: %o", error);
+    process.exitCode = 1;
+});

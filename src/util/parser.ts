@@ -1,5 +1,6 @@
 // src/utils/parser.ts
 import fs from 'fs'; 
+import { XMLParser, XMLValidator } from 'fast-xml-parser';
 import logger from './logger';
 
 export const parseCSV = (filePath: string): Promise<string[][]> => {
@@ -26,4 +27,18 @@ export const parseCSV = (filePath: string): Promise<string[][]> => {
       reject(error); // Reject the promise if an error occurs
     });
   });
+};
+
+export const parseJSON = async (filePath: string): Promise<unknown> => {
+  const content = await fs.promises.readFile(filePath, 'utf-8');
+  return JSON.parse(content) as unknown;
+};
+
+export const parseXML = async (filePath: string): Promise<unknown> => {
+  const content = await fs.promises.readFile(filePath, 'utf-8');
+  const validation = XMLValidator.validate(content);
+  if (validation !== true) {
+    throw new Error(`Malformed XML: ${validation.err.msg}`);
+  }
+  return new XMLParser().parse(content) as unknown;
 };
