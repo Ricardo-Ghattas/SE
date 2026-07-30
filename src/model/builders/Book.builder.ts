@@ -12,6 +12,10 @@ export class BookBuilder {
     private price!: number;
     private quantity!: number;
 
+    public static newBuilder(): BookBuilder {
+        return new BookBuilder();
+    }
+
     setTitle(title: string): BookBuilder {
         this.title = title;
         return this;
@@ -81,6 +85,9 @@ export class BookBuilder {
                 console.error("Required properties are missing, you cant build a book");
                 throw new Error("Required properties are missing");
             }
+        }
+        if (Number.isNaN(this.price) || Number.isNaN(this.quantity)) {
+            throw new Error("Book price and quantity must be valid numbers");
         }
 
         return new Book(
